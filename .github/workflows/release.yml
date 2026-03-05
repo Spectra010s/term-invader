@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: write
-  
+ 
 jobs:
   build:
     strategy:
@@ -29,21 +29,33 @@ jobs:
             outfile: term-invader-macos-silicon
 
     runs-on: ${{ matrix.os }}
-
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      
       - name: Install dependencies
         run: bun install
-
       - name: Build Binary
         run: bun build ./game.js --compile --target=${{ matrix.target }} --outfile=${{ matrix.outfile }}
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.outfile }}
+          path: ${{ matrix.outfile }}
 
-      - name: Release
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          merge-multiple: true
+
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.outfile }}
+          files: ./artifacts/*
           body: |
             ## TERM-INVADER v${{ github.ref_name }}
             
