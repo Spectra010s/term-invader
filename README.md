@@ -50,4 +50,4 @@ Got a cool idea or suggestion for an enemy pattern or a new power-up or themes?
 - Open a Pull Request.
 
 
-​Built with ❤️ by [Your Name/X Handle]
+​Built with ❤️ by Spectra010s
