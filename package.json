@@ -1,13 +1,13 @@
 {
   "name": "term-invader",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A high-stakes retro space shooter for your terminal.",
   "main": "game.js",
   "bin": {
     "term-invader": "./game.js"
   },
   "type": "commonjs",
-   "files": [
+  "files": [
     "game.js",
     "engine.js"
   ],
