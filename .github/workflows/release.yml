@@ -1,4 +1,5 @@
-name: Build and Release Term Invader
+name: Publish and Release Term Invader
+
 on:
   push:
     tags:
@@ -6,74 +7,40 @@ on:
 
 permissions:
   contents: write
- 
+
 jobs:
-  build:
-    strategy:
-      matrix:
-        include:
-          - os: windows-latest
-            target: bun-windows-x64
-            outfile: term-invader-win-x64.exe
-          - os: ubuntu-latest
-            target: bun-linux-x64
-            outfile: term-invader-linux-x64
-          - os: ubuntu-latest
-            target: bun-linux-arm64
-            outfile: term-invader-linux-arm64
-          - os: macos-latest
-            target: bun-darwin-x64
-            outfile: term-invader-macos-intel
-          - os: macos-latest
-            target: bun-darwin-arm64
-            outfile: term-invader-macos-silicon
-
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - name: Install dependencies
-        run: bun install
-      - name: Build Binary
-        run: bun build ./game.js --compile --target=${{ matrix.target }} --outfile=${{ matrix.outfile }}
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.outfile }}
-          path: ${{ matrix.outfile }}
-
-  release:
-    needs: build
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ./artifacts
-          merge-multiple: true
+          node-version: 'latest'
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm install
+
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ./artifacts/*
+          generate_release_notes: true
           body: |
             ## TERM-INVADER v${{ github.ref_name }}
             
             ### Quick Install
-            **Windows (PowerShell):**
-            ```powershell
-            Set-ExecutionPolicy Bypass -Scope Process -Force; irm [https://raw.githubusercontent.com/Spectra010s/term-invader/main/install.ps1](https://raw.githubusercontent.com/Spectra010s/term-invader/main/install.ps1) | iex
-            ```
-            
-            **Linux / Mac (Terminal):**
             ```bash
-            curl -sSL [https://raw.githubusercontent.com/Spectra010s/term-invader/main/install.sh](https://raw.githubusercontent.com/Spectra010s/term-invader/main/install.sh) | bash
+            npm i -g term-invader
             ```
-            
-            ---
-            **Manual Assets:**
-            - Windows: `term-invader-win-x64.exe`
-            - Linux: `term-invader-linux-x64` or `term-invader-linux-arm64`
-            - Mac: `term-invader-macos-intel` or `term-invader-macos-silicon`
+            Play it instantly in your terminal:
+            ```bash
+            npx term-invader
+            ```
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
