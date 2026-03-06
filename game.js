@@ -109,7 +109,7 @@ function updateHighScore() {
   process.stdout.write("\x1b[2J\x1b[H");
   process.stdout.write(`${CYAN}${BOLD}  HIGH SCORE  ${RESET}\n\n`);
   process.stdout.write(`Current Best: ${YELLOW}${highScore}${RESET}\n\n`);
-  process.stdout.write(`${YELLOW}Press any key to return${RESET}\n`);
+  process.stdout.write(`${YELLOW}Press any key to return...${RESET}\n`);
 }
 
 function updateHelp() {
@@ -119,7 +119,7 @@ function updateHelp() {
   help += ` [◀] / A         : ${GREEN}Move Left${RESET}\n`;
   help += ` [▶] / D         : ${GREEN}Move Right${RESET}\n\n`;
   help += `Grab [✚] for extra HP!\n`;
-  help += `Press any key to go back...`;
+  help += `${YELLOW}Press any key to return...${RESET}`;
   process.stdout.write(help);
 }
 
