@@ -40,7 +40,7 @@ let menuTitle = "";
 function setState(newState) {
   state = newState;
   if (newState === "MENU") {
-    openMenu("WELCOME TO TERM-INVADER!", ["Start Game", "Controls", "Quit"], menuActions.STARTUP);
+    openMenu("WELCOME TO TERM-INVADER!", ["Start Game", "High Score", "Controls", "Quit"], menuActions.STARTUP);
   } else if (newState === "PAUSED") {
     openMenu("GAME PAUSED", ["Resume", "Restart", "Controls", "Quit"], menuActions.PAUSED);
   }
@@ -104,6 +104,14 @@ function updatePause() {
   process.stdout.write(screen);
 }
 
+function updateHighScore() {
+  highScore = getHighScore();
+  process.stdout.write("\x1b[2J\x1b[H");
+  process.stdout.write(`${CYAN}${BOLD}  HIGH SCORE  ${RESET}\n\n`);
+  process.stdout.write(`Current Best: ${YELLOW}${highScore}${RESET}\n\n`);
+  process.stdout.write(`${YELLOW}Press any key to return...${RESET}\n`);
+}
+
 function updateHelp() {
   let help = "\x1b[H\x1b[J";
   help += `${CYAN}${BOLD}  CONTROLS  ${RESET}\n\n`;
@@ -111,7 +119,7 @@ function updateHelp() {
   help += ` [◀] / A         : ${GREEN}Move Left${RESET}\n`;
   help += ` [▶] / D         : ${GREEN}Move Right${RESET}\n\n`;
   help += `Grab [✚] for extra HP!\n`;
-  help += `Press any key to go back...`;
+  help += `${YELLOW}Press any key to return...${RESET}`;
   process.stdout.write(help);
 }
 
@@ -195,7 +203,7 @@ function updateGame() {
     const progress = Math.ceil((boss.hp / boss.maxHp) * barWidth);
     frame += `${RED_BG} BOSS ${RESET} [${YELLOW}${'#'.repeat(progress)}${RESET}${'.'.repeat(barWidth - progress)}]\n`;
   } else {
-    frame += "\n";
+    frame += "—".repeat(WIDTH) + "\n";
   }
 
   for (let y = 0; y < HEIGHT; y++) {
@@ -216,7 +224,7 @@ function updateGame() {
     frame += line.join('') + "\n";
   }
 
-  process.stdout.write(frame);
+  process.stdout.write(frame + "\n" + "—".repeat(WIDTH));
 }
 
 // STATE MAP
@@ -225,7 +233,8 @@ const states = {
   PLAYING: updateGame,
   PAUSED: updatePause,
   HELP: updateHelp,
-  GAME_OVER: updateGameOver
+  GAME_OVER: updateGameOver,
+  HIGH_SCORE: updateHighScore
 };
 
 // GAME LOOP
@@ -247,8 +256,10 @@ function resetGame() {
 const menuActions = {
   STARTUP: (choice) => {
     if (choice === 1) state = "PLAYING";
-    if (choice === 2) { prevState = "MENU"; state = "HELP"; }
-    if (choice === 3) process.exit();
+  if (choice === 2) {   prevState = "MENU"; 
+  state = "HIGH_SCORE";}
+  if (choice === 3) { prevState = "MENU"; state = "HELP"; }
+  if (choice === 4) process.exit();   
   },
   PAUSED: (choice) => {
     if (choice === 1) state = "PLAYING";
@@ -263,6 +274,7 @@ const inputHandlers = {
   MENU: (key) => handleMenuInput(key),
   PAUSED: (key) => handleMenuInput(key),
   HELP: () => { state = prevState; },
+  HIGH_SCORE: () => { state = prevState; },
   PLAYING: (key) => {
     if (key.toLowerCase() === 'p') setState("PAUSED");
     if ((key === '\u001b[D' || key === 'a') && playerX > 2) playerX -= 2;
